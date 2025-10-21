@@ -62,22 +62,22 @@
   <div id="bottom-text"></div>
 
   <script>
-    // === STARFIELD WITH CONNECTIONS ===
     const canvas = document.getElementById('starfield');
     const ctx = canvas.getContext('2d');
+
     let stars = [];
+    const numStars = 100;
     let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
     function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      stars = Array.from({ length: 150 }, () => ({
+      stars = Array.from({ length: numStars }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         r: Math.random() * 2,
-        s: Math.random() * 0.5 + 0.2,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4
       }));
     }
     window.addEventListener('resize', resize);
@@ -88,44 +88,43 @@
       mouse.y = e.clientY;
     });
 
-    function draw() {
+    function drawStars() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "white";
 
-      // update & draw stars
-      for (let star of stars) {
-        star.x += star.vx;
-        star.y += star.vy;
+      for (let s of stars) {
+        // Move the stars
+        s.x += s.vx;
+        s.y += s.vy;
 
-        // bounce off edges
-        if (star.x < 0 || star.x > canvas.width) star.vx *= -1;
-        if (star.y < 0 || star.y > canvas.height) star.vy *= -1;
+        if (s.x < 0 || s.x > canvas.width) s.vx *= -1;
+        if (s.y < 0 || s.y > canvas.height) s.vy *= -1;
 
+        // Draw star
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx.fill();
-      }
 
-      // draw lines to mouse
-      for (const star of stars) {
-        const dx = star.x - mouse.x;
-        const dy = star.y - mouse.y;
+        // Draw connection line to mouse
+        const dx = s.x - mouse.x;
+        const dy = s.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 150) {
           ctx.beginPath();
           ctx.strokeStyle = `rgba(147, 51, 234, ${1 - dist / 150})`;
           ctx.lineWidth = 0.8;
-          ctx.moveTo(star.x, star.y);
+          ctx.moveTo(s.x, s.y);
           ctx.lineTo(mouse.x, mouse.y);
           ctx.stroke();
         }
       }
 
-      requestAnimationFrame(draw);
+      requestAnimationFrame(drawStars);
     }
-    draw();
 
-    // === TYPEWRITER + PROGRESS BAR ===
+    requestAnimationFrame(drawStars);
+
+    // === TYPEWRITER + PROGRESS ===
     function type(el, text, delay, cb) {
       let i = 0;
       const t = setInterval(() => {
@@ -135,10 +134,10 @@
     }
 
     function erase(el, delay, cb) {
-      let t = el.textContent;
-      let i = t.length;
+      let text = el.textContent;
+      let i = text.length;
       const e = setInterval(() => {
-        el.textContent = t.slice(0, --i);
+        el.textContent = text.slice(0, --i);
         if (i === 0) { clearInterval(e); cb && cb(); }
       }, delay);
     }
