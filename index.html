@@ -1,168 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Galaxy Unblocked Games</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading...</title>
   <style>
-    body, html {
+    body {
       margin: 0;
-      padding: 0;
       overflow: hidden;
-      background: black;
-      height: 100%;
-      width: 100%;
+      background: radial-gradient(ellipse at bottom, #0d1b2a, #000);
+      color: white;
+      font-family: 'Courier New', monospace;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: white;
-      font-family: Arial, sans-serif;
+      flex-direction: column;
+      position: relative;
     }
 
-    #stars {
-      position: fixed;
+    canvas {
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 0;
     }
 
-    #loading {
-      position: absolute;
+    #progress-container {
+      width: 60%;
+      height: 20px;
+      border: 2px solid white;
+      border-radius: 10px;
+      overflow: hidden;
       z-index: 2;
-      text-align: center;
     }
 
     #progress-bar {
-      width: 300px;
-      height: 8px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 5px;
-      overflow: hidden;
-      margin-top: 15px;
-    }
-
-    #progress-fill {
       width: 0%;
       height: 100%;
-      background: linear-gradient(90deg, #00ffff, #ff00ff);
+      background: linear-gradient(90deg, #3b82f6, #9333ea);
       transition: width 0.3s;
     }
+
+    #top-text, #bottom-text {
+      position: absolute;
+      font-size: 1.5rem;
+      text-shadow: 0 0 10px #fff;
+      z-index: 2;
+    }
+
+    #top-text { top: 25%; }
+    #bottom-text { bottom: 25%; }
   </style>
 </head>
 <body>
-  <canvas id="stars"></canvas>
-  <div id="loading">
-    <h1>🚀 Loading Galaxy...</h1>
-    <div id="progress-bar"><div id="progress-fill"></div></div>
-  </div>
+  <canvas id="starfield"></canvas>
+  <div id="top-text"></div>
+  <div id="progress-container"><div id="progress-bar"></div></div>
+  <div id="bottom-text"></div>
 
   <script>
-    // Star + Mouse Constellation Effect
-    const canvas = document.getElementById("stars");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // === Starfield ===
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let stars = [], mouse = { x: 0, y: 0 };
 
-    const stars = [];
-    const numStars = 150;
-    const mouse = { x: null, y: null };
+    function resize() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+      stars = Array.from({ length: 150 }, () => ({
+        x: Math.random() * innerWidth,
+        y: Math.random() * innerHeight,
+        r: Math.random() * 2,
+        s: Math.random() * 0.5 + 0.2
+      }));
+    }
+    window.addEventListener('resize', resize);
+    resize();
 
-    window.addEventListener("mousemove", e => {
-      mouse.x = e.x;
-      mouse.y = e.y;
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX; 
+      mouse.y = e.clientY;
     });
 
-    window.addEventListener("resize", () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    });
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
 
-    class Star {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 1;
-        this.speedX = (Math.random() - 0.5) * 0.5;
-        this.speedY = (Math.random() - 0.5) * 0.5;
-      }
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-      }
-      draw() {
-        ctx.fillStyle = "white";
+      // draw stars
+      for (const star of stars) {
+        let dx = (mouse.x - canvas.width / 2) * star.s * 0.02;
+        let dy = (mouse.y - canvas.height / 2) * star.s * 0.02;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.arc(star.x + dx, star.y + dy, star.r, 0, Math.PI * 2);
         ctx.fill();
       }
-    }
 
-    function connectStars() {
-      for (let i = 0; i < stars.length; i++) {
-        for (let j = i; j < stars.length; j++) {
-          let dx = stars[i].x - stars[j].x;
-          let dy = stars[i].y - stars[j].y;
-          let distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 100) {
-            ctx.strokeStyle = "rgba(255,255,255," + (1 - distance / 100) + ")";
-            ctx.lineWidth = 0.3;
-            ctx.beginPath();
-            ctx.moveTo(stars[i].x, stars[i].y);
-            ctx.lineTo(stars[j].x, stars[j].y);
-            ctx.stroke();
-          }
-        }
-
-        // Connect stars to mouse
-        if (mouse.x && mouse.y) {
-          let dx = stars[i].x - mouse.x;
-          let dy = stars[i].y - mouse.y;
-          let distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < 150) {
-            ctx.strokeStyle = "rgba(0,255,255," + (1 - distance / 150) + ")";
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            ctx.moveTo(stars[i].x, stars[i].y);
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.stroke();
-          }
+      // connect stars to mouse
+      for (const star of stars) {
+        const dx = star.x - mouse.x;
+        const dy = star.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) { // connection distance
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(147, 51, 234, ${1 - dist / 150})`; // purple glow
+          ctx.lineWidth = 0.8;
+          ctx.moveTo(star.x, star.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.stroke();
         }
       }
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+
+    // === Typewriter + Progress ===
+    function type(el, text, delay, cb) {
+      let i = 0; 
+      const t = setInterval(() => {
+        el.textContent = text.slice(0, ++i);
+        if (i === text.length) { clearInterval(t); cb && cb(); }
+      }, delay);
     }
 
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      stars.forEach(star => {
-        star.update();
-        star.draw();
-      });
-      connectStars();
-      requestAnimationFrame(animate);
+    function erase(el, delay, cb) {
+      let t = el.textContent; 
+      let i = t.length;
+      const e = setInterval(() => {
+        el.textContent = t.slice(0, --i);
+        if (i === 0) { clearInterval(e); cb && cb(); }
+      }, delay);
     }
 
-    for (let i = 0; i < numStars; i++) {
-      stars.push(new Star());
-    }
-    animate();
+    const bar = document.getElementById('progress-bar');
+    const top = document.getElementById('top-text');
+    const bottom = document.getElementById('bottom-text');
+    const total = 45000;
+    const start = Date.now();
 
-    // Simulated loading
-    let progress = 0;
-    const fill = document.getElementById("progress-fill");
-    const interval = setInterval(() => {
-      progress += 3;
-      fill.style.width = progress + "%";
-      if (progress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          window.location.href = "games.html";
-        }, 500);
+    type(top, "games.xyz", 100);
+    setTimeout(() => type(bottom, "Made by Ray", 100), 10000);
+
+    const tick = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const progress = Math.min((elapsed / total) * 100, 100);
+      bar.style.width = progress + "%";
+
+      if (elapsed > total - 2000 && !window.deleted) {
+        window.deleted = true;
+        erase(top, 50); 
+        erase(bottom, 50);
       }
-    }, 80);
+      if (elapsed >= total) {
+        clearInterval(tick);
+        window.location.href = "games.html"; // go to main page
+      }
+    }, 100);
   </script>
 </body>
 </html>
