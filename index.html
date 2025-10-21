@@ -1,51 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Galaxy Unblocked Games</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading...</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(ellipse at bottom, #0d1b2a, #000);
+      color: white;
+      font-family: 'Courier New', monospace;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      position: relative;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    #progress-container {
+      position: relative;
+      width: 60%;
+      height: 20px;
+      border: 2px solid white;
+      border-radius: 10px;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    #progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #9333ea);
+      transition: width 0.3s;
+    }
+
+    #top-text, #bottom-text {
+      z-index: 2;
+      position: absolute;
+      font-size: 1.5rem;
+      text-shadow: 0 0 10px #fff;
+    }
+
+    #top-text {
+      top: 25%;
+    }
+
+    #bottom-text {
+      bottom: 25%;
+    }
+  </style>
 </head>
 <body>
-  <canvas id="stars"></canvas>
+  <canvas id="starfield"></canvas>
 
-  <header>
-    <h1>Ray Unblocked Games</h1>
-    <div class="top-controls">
-      <input type="text" id="search" placeholder="Search games..." />
-      <button id="panic" onclick="window.location.href='https://classroom.google.com'">🚨 Panic</button>
-    </div>
-  </header>
+  <div id="top-text"></div>
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+  <div id="bottom-text"></div>
 
-  <main id="games-container"></main>
+  <script>
+    // === STARFIELD BACKGROUND ===
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let mouse = { x: 0, y: 0 };
 
-  <script src="script.js"></script>
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      stars = Array.from({ length: 150 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2,
+        s: Math.random() * 0.5 + 0.2
+      }));
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
+      for (let star of stars) {
+        let dx = (mouse.x - canvas.width / 2) * star.s * 0.02;
+        let dy = (mouse.y - canvas.height / 2) * star.s * 0.02;
+        ctx.beginPath();
+        ctx.arc(star.x + dx, star.y + dy, star.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(drawStars);
+    }
+    drawStars();
+
+    // === TYPEWRITER TEXT ===
+    function typeWriter(element, text, delay, callback) {
+      let i = 0;
+      const interval = setInterval(() => {
+        element.textContent = text.slice(0, ++i);
+        if (i === text.length) {
+          clearInterval(interval);
+          if (callback) callback();
+        }
+      }, delay);
+    }
+
+    function deleteWriter(element, delay, callback) {
+      const text = element.textContent;
+      let i = text.length;
+      const interval = setInterval(() => {
+        element.textContent = text.slice(0, --i);
+        if (i === 0) {
+          clearInterval(interval);
+          if (callback) callback();
+        }
+      }, delay);
+    }
+
+    // === PROGRESS BAR ===
+    const progressBar = document.getElementById('progress-bar');
+    const topText = document.getElementById('top-text');
+    const bottomText = document.getElementById('bottom-text');
+    const totalTime = 45000; // 45 seconds
+    const startTime = Date.now();
+
+    typeWriter(topText, "games.xyz", 100);
+    setTimeout(() => typeWriter(bottomText, "Made by Ray", 100), 10000);
+
+    const progressInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / totalTime) * 100, 100);
+      progressBar.style.width = progress + "%";
+
+      // Delete text 2 seconds before the end
+      if (elapsed > totalTime - 2000 && !window.textDeleted) {
+        window.textDeleted = true;
+        deleteWriter(topText, 50);
+        deleteWriter(bottomText, 50);
+      }
+
+      // When done, go to main games page
+      if (elapsed >= totalTime) {
+        clearInterval(progressInterval);
+        window.location.href = "games.html"; // 👈 Change this if your games page is named differently
+      }
+    }, 100);
+  </script>
 </body>
 </html>
-
-<div class="game-grid">
-  <a href="games/soccer-random.html" class="game-card">
-    <h3>Soccer Random</h3>
-  </a>
-
-  <a href="games/basketball-stars.html" class="game-card">
-    <h3>Basketball Stars</h3>
-  </a>
-
-  <a href="games/fnaf1.html" class="game-card">
-    <h3>Five Nights at Freddy’s 1</h3>
-  </a>
-
-  <a href="games/fnaf2.html" class="game-card">
-    <h3>Five Nights at Freddy’s 2</h3>
-  </a>
-
-    <a href="games/basket-randoms.html" class="game-card">
-    <h3>Basket randoms</h3>
-  </a>
-
-    <a href="games/boxing-randoms.html" class="game-card">
-    <h3>Boxing randoms 2</h3>
-  </a>
-</div>
-
